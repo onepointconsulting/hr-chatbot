@@ -1,4 +1,6 @@
+# Onepoint HR Chatbot
 
+This is a simple HR chatbot based on Chainlit with memory support.
 
 ## Installation
 
@@ -24,5 +26,5 @@ chainlit run hr_chatbot_chainlit.py
 
 For Development:
 ```
-chainlit run hr_chatbot_chainlit.py -w
+chainlit run hr_chatbot_chainlit.py -w --port 8081
 ```
