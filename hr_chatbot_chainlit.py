@@ -26,6 +26,7 @@ async def init():
     await msg.update(content=f"You can now ask questions about Onepoint HR!")#
     return chain
 
+
 @cl.langchain_postprocess
 async def process_response(res):
     answer = res["answer"]

@@ -15,13 +15,14 @@ pip install tiktoken
 pip install chainlit
 pip install pdfminer
 pip install pypdfium2
+pip install prompt_toolkit
 ```
 
 ## Running
 
 With Chainlit:
 ```
-chainlit run hr_chatbot_chainlit.py
+chainlit run hr_chatbot_chainlit.py --port 8081
 ```
 
 For Development:
