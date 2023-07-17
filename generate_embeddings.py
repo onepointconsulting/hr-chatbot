@@ -25,6 +25,9 @@ def load_pdfs(path: Path) -> List[Document]:
     for pdf in path.glob("*.pdf"):
         loader = PyPDFium2Loader(str(pdf.absolute()))
         pages: List[Document] = loader.load_and_split()
+        for i, p in enumerate(pages):
+            file_name = re.sub(r".+[\\/]", '', p.metadata['source'])
+            p.metadata['source'] = f"{file_name} page {i + 1}"
         all_pages.extend(pages)
         logger.info(f"Processed {pdf}, all_pages size: {len(all_pages)}")
     log_stats(all_pages)

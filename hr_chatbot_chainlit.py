@@ -70,6 +70,7 @@ async def process_response(res):
 
     found_sources = []
     if sources:
+        logger.info(f"sources: {sources}")
         raw_sources, file_sources = source_splitter(sources)
         for i, source in enumerate(raw_sources):
             try:
@@ -85,7 +86,7 @@ async def process_response(res):
         if found_sources:
             answer += f"\nSources: {', '.join(found_sources)}"
         else:
-            answer += "\nNo sources found"
+            answer += f"\n{sources}"
 
     await cl.Message(content=answer, elements=source_elements).send()
 

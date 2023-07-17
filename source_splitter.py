@@ -5,10 +5,11 @@ from log_init import logger
 def source_splitter(sources: str):
     logger.info(f"There are sources: {sources}")
     raw_sources, file_sources = [], []
-    for source in sources.split(","):
+    split_char = "," if "," in sources else "-"
+    for source in sources.split(split_char):
         source = source.strip()
         raw_sources.append(source)
-        file_sources.append(re.sub(r".+[\\/](.+)", r"\1", source))
+        file_sources.append(re.sub(r".+[\/](.+)\spage.+", r"\1", source))
     return raw_sources, file_sources
 
 
@@ -17,3 +18,8 @@ if __name__ == "__main__":
     raw_sources, file_sources = source_splitter(sources)
     logger.info(f"raw sources: {raw_sources}")
     logger.info(f"file sources: {file_sources}")
+    sources = """C:\\development\\playground\\langchain\\hr_chatbot\\data\\11.A.8.2 Acceptable Usage Policy.pdf page 10, 11.A.6.1 Mobile Devices_ BYOD and Remote Working Policy.pdf page 5, 7, 11, 04.13 HR Policies & Procedures V10.docx .pdf page 44"""
+    raw_sources, file_sources = source_splitter(sources)
+    logger.info(f"raw sources: {raw_sources}")
+    logger.info(f"file sources: {file_sources}")
+

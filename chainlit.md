@@ -10,6 +10,4 @@ Please send your feedback to Gil and Sangeetha 💻😊
 
 Here is more information about [Onepoint](https://www.onepointltd.com/). 📚
 
-Test
-
 

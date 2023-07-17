@@ -3,6 +3,7 @@ from langchain.memory import ConversationSummaryBufferMemory
 from langchain.vectorstores import FAISS
 from langchain.schema import Document
 from langchain.memory.utils import get_prompt_input_key
+from langchain.vectorstores.base import VectorStoreRetriever
 from config import cfg
 from typing import Any, Dict, Tuple, List, TypeVar
 
@@ -96,9 +97,11 @@ def create_retrieval_chain(docsearch: VST, verbose=False, humour=True) -> Retrie
         chain_type_kwargs['verbose'] = True
     if humour:
         chain_type_kwargs['prompt'] = HUMOUR_PROMPT
+    search_retriever: VectorStoreRetriever = docsearch.as_retriever()
+    search_retriever.search_kwargs = {'k': cfg.search_results}
     qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
         cfg.llm, 
-        retriever=docsearch.as_retriever(),
+        retriever=search_retriever,
         chain_type="stuff", 
         memory=memory,
         chain_type_kwargs=chain_type_kwargs
