@@ -19,9 +19,6 @@ class Config():
     def __repr__(self) -> str:
         return (
 f"""# Configuration
-chunk_size: {self.chunk_size}
-chunk_overlap: {self.chunk_overlap}
-chunk_separator: {self.chunk_separator}
 faiss_persist_directory: {self.faiss_persist_directory}
 
 embeddings: {self.embeddings}
