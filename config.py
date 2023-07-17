@@ -7,9 +7,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config():
-    chunk_size = 6000
-    chunk_overlap = 100
-    chunk_separator = "\n\n"
     faiss_persist_directory = Path(os.environ['FAISS_STORE'])
     if not faiss_persist_directory.exists():
         faiss_persist_directory.mkdir()
