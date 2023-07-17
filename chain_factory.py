@@ -35,6 +35,14 @@ class KeySourceMemory(ConversationSummaryBufferMemory):
 
 
 def load_embeddinges() -> Tuple[VST, List[Document]]:
+    """
+    Loads the PDF documents to support text extraction in the Chainlit UI. 
+    In case there are no persisted embeddings, the embeddings are generated. 
+    In case the embeddings are persisted, then they are loaded from the file system.
+    
+    Returns:
+    Tuple[VST, List[Document]]: Recturs a reference to the vector store and the list of all pdf files.
+    """
     embedding_dir = cfg.faiss_persist_directory
     logger.info(f"Checking: {embedding_dir}")
     doc_location: str = os.environ["DOC_LOCATION"]
@@ -88,9 +96,19 @@ HUMOUR_PROMPT = PromptTemplate(template=template, input_variables=["summaries", 
 
 
 
-def create_retrieval_chain(docsearch: VST, verbose=False, humour=True) -> RetrievalQAWithSourcesChain:
-    # Create a chain that uses the Chroma vector store
+def create_retrieval_chain(docsearch: VST, verbose: bool=False, humour: bool=True) -> RetrievalQAWithSourcesChain:
 
+    """
+    Creates the QA chain with memory and if humour is true with a manipulated prompt that tends to create jokes on certain occasions.
+
+    Parameters:
+    docsearch (VST): A reference to the vector store.
+    verbose (bool): Determines whether LangChain's internal logging is printed to the console or not.
+    humour (bool): Determines whether the prompt for answers with jokes is used or not.
+    
+    Returns:
+    RetrievalQAWithSourcesChain: The QA chain
+    """
     memory = KeySourceMemory(llm=cfg.llm, input_key='question', output_key='answer')
     chain_type_kwargs = {}
     if verbose:
