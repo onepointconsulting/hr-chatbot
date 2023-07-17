@@ -20,6 +20,16 @@ VST = TypeVar("VST", bound="VectorStore")
 
 
 def load_pdfs(path: Path) -> List[Document]:
+    """
+    Loads the PDFs and extracts a document per page.
+    The page details are added to the extracted metadata
+    
+    Parameters:
+    path (Path): The path where the PDFs are saved.
+    
+    Returns:
+    List[Document]: Returns a list of values
+    """
     assert path.exists()
     all_pages = []
     for pdf in path.glob("*.pdf"):
@@ -45,6 +55,16 @@ def log_stats(documents: List[Document]):
 
 
 def generate_embeddings(documents: List[Document], path: Path) -> VST:
+    """
+    Receives a list of documents and generates the embeddings via OpenAI API.
+    
+    Parameters:
+    documents (List[Document]): The document list with one page per document.
+    path (Path): The path where the documents are found.
+    
+    Returns:
+    VST: Recturs a reference to the vector store.
+    """
     try:
         docsearch = FAISS.from_documents(documents, cfg.embeddings)
         docsearch.save_local(cfg.faiss_persist_directory)
