@@ -29,3 +29,8 @@ For Development:
 ```
 chainlit run hr_chatbot_chainlit.py -w --port 8081
 ```
+
+Command line:
+```
+python ./hr_chatbot_cli.py
+```
