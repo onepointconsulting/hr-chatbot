@@ -12,8 +12,4 @@ Here is more information about [Onepoint](https://www.onepointltd.com/). 📚
 
 Test
 
-<style>
-a {
-    visibility: hidden;
-}
-</style>
+
