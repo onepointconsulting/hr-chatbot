@@ -18,6 +18,16 @@ pip install pypdfium2
 pip install prompt_toolkit
 ```
 
+## Configuration
+
+Please make sure that you have a .env file with the following variables:
+```
+OPENAI_API_KEY=<open ai key>
+DOC_LOCATION=<absolute path of the pdf files>
+FAISS_STORE=<Location of the FAISS internal files>
+HUMOUR=<true|false>
+```
+
 ## Running
 
 With Chainlit:
