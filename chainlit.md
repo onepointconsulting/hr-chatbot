@@ -9,3 +9,11 @@ Please send your feedback to Gil and Sangeetha 💻😊
 ## More information about Onepoint
 
 Here is more information about [Onepoint](https://www.onepointltd.com/). 📚
+
+Test
+
+<style>
+a {
+    visibility: hidden;
+}
+</style>

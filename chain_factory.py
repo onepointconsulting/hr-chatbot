@@ -83,19 +83,19 @@ QUESTION: {question}
 {summaries}
 =========
 FINAL ANSWER:"""
-HUMOR_PROMPT = PromptTemplate(template=template, input_variables=["summaries", "question"])
+HUMOUR_PROMPT = PromptTemplate(template=template, input_variables=["summaries", "question"])
 
 
 
-def create_retrieval_chain(docsearch: VST, verbose=False, humor=True) -> RetrievalQAWithSourcesChain:
+def create_retrieval_chain(docsearch: VST, verbose=False, humour=True) -> RetrievalQAWithSourcesChain:
     # Create a chain that uses the Chroma vector store
 
     memory = KeySourceMemory(llm=cfg.llm, input_key='question', output_key='answer')
     chain_type_kwargs = {}
     if verbose:
         chain_type_kwargs['verbose'] = True
-    if humor:
-        chain_type_kwargs['prompt'] = HUMOR_PROMPT
+    if humour:
+        chain_type_kwargs['prompt'] = HUMOUR_PROMPT
     qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
         cfg.llm, 
         retriever=docsearch.as_retriever(),
