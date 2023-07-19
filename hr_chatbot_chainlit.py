@@ -63,6 +63,10 @@ async def init():
     cl.user_session.set(KEY_META_DATAS, metadatas)
     cl.user_session.set(KEY_TEXTS, texts)
     # remove_footer()
+
+    build_dir = cl.server.build_dir
+    logger.warn(f"Build directory: {build_dir}")
+
     update_msg = cl.Message(content=f"You can now ask questions about Onepoint HR!")
     await update_msg.send()
     return chain
