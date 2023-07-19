@@ -1,6 +1,8 @@
-# Welcome to Aishu Onepoint HR Bot! 🚀🤖
+# Welcome to Ask Aishu HR Bot! 🚀🤖
 
 Using this chatbot you can ask questions about the HR policies at Onepoint.
+
+Aishu stands for "Artificial Intelligence (powered) Smart Hr Unit".
 
 ## Feedback 🔗
 
