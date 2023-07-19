@@ -18,6 +18,16 @@ pip install pypdfium2
 pip install prompt_toolkit
 ```
 
+### Custom environment
+
+```
+conda create -n langchain_chainlit_2  python=3.11
+conda activate langchain_chainlit_2
+pip install C:\development\playground\chainlit\src\dist\chainlit-0.5.3-py3-none-any.whl
+pip install langchain
+pip install openai
+```
+
 ## Configuration
 
 Please make sure that you have a .env file with the following variables:

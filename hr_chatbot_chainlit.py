@@ -41,6 +41,16 @@ def remove_footer():
 @cl.langchain_factory(use_async=True)
 async def init():
 
+    """
+    Loads the vector data store object and the PDF documents. Creates the QA chain.
+    Sets up some session variables and removes the Chainlit footer.
+    
+    Parameters:
+    use_async (bool): Determines whether async is to be used or not.
+
+    Returns:
+    RetrievalQAWithSourcesChain: The QA chain
+    """
     msg = cl.Message(content=f"Processing files. Please wait.")
     await msg.send()
     docsearch, documents = load_embeddinges()
@@ -52,13 +62,23 @@ async def init():
     texts = [d.page_content for d in documents]
     cl.user_session.set(KEY_META_DATAS, metadatas)
     cl.user_session.set(KEY_TEXTS, texts)
-    remove_footer()
-    await msg.update(content=f"You can now ask questions about Onepoint HR!")#
+    # remove_footer()
+    update_msg = cl.Message(content=f"You can now ask questions about Onepoint HR!")
+    await update_msg.send()
     return chain
 
 
 @cl.langchain_postprocess
-async def process_response(res):
+async def process_response(res) -> cl.Message:
+    """
+    Tries to extract the sources and corresponding texts from the sources.
+
+    Parameters:
+    res (dict): A dictionary with the answer and sources provided by the LLM via LangChain.
+    
+    Returns:
+    cl.Message: The message containing the answer and the list of sources with corresponding texts.
+    """
     answer = res["answer"]
     sources = res["sources"].strip()
     source_elements = []
