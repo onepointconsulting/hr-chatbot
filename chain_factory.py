@@ -2,6 +2,7 @@ from langchain.chains import RetrievalQAWithSourcesChain
 from langchain.memory import ConversationSummaryBufferMemory
 from langchain.vectorstores import FAISS
 from langchain.schema import Document
+from langchain.prompts import PromptTemplate
 from langchain.memory.utils import get_prompt_input_key
 from langchain.vectorstores.base import VectorStoreRetriever
 from config import cfg
@@ -54,7 +55,6 @@ def load_embeddinges() -> Tuple[VST, List[Document]]:
         return docsearch, documents
     return generate_embeddings(documents, doc_location), documents
 
-from langchain.prompts import PromptTemplate
 
 
 template = """Given the following extracted parts of a long document and a question, create a final answer with references ("SOURCES"). If you know a joke about the subject, make sure that you include it in the response.
@@ -99,7 +99,8 @@ HUMOUR_PROMPT = PromptTemplate(template=template, input_variables=["summaries", 
 def create_retrieval_chain(docsearch: VST, verbose: bool=False, humour: bool=True) -> RetrievalQAWithSourcesChain:
 
     """
-    Creates the QA chain with memory and if humour is true with a manipulated prompt that tends to create jokes on certain occasions.
+    This function creates the QA chain with memory and in case the humour parameter is true, 
+    then a manipulated prompt - that tends to create jokes on certain occasions - is used.
 
     Parameters:
     docsearch (VST): A reference to the vector store.

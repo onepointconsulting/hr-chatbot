@@ -3,6 +3,7 @@ import chainlit as cl
 
 from chain_factory import create_retrieval_chain, load_embeddinges
 from source_splitter import source_splitter
+from chainlit.context import get_emitter
 
 from log_init import logger
 
@@ -51,6 +52,10 @@ async def init():
     Returns:
     RetrievalQAWithSourcesChain: The QA chain
     """
+
+    emitter = get_emitter()
+    remote_address = emitter.session.remote_address
+
     msg = cl.Message(content=f"Processing files. Please wait.")
     await msg.send()
     docsearch, documents = load_embeddinges()
@@ -67,7 +72,7 @@ async def init():
     build_dir = cl.server.build_dir
     logger.warn(f"Build directory: {build_dir}")
 
-    update_msg = cl.Message(content=f"You can now ask questions about Onepoint HR!")
+    update_msg = cl.Message(content=f"You can now ask questions about Onepoint HR (IP Address: {remote_address})!")
     await update_msg.send()
     return chain
 
