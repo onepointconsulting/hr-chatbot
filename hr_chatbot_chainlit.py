@@ -54,7 +54,7 @@ async def init():
     """
 
     emitter = get_emitter()
-    remote_address = emitter.session.remote_address
+    remote_address = emitter.session.environ
 
     msg = cl.Message(content=f"Processing files. Please wait.")
     await msg.send()
