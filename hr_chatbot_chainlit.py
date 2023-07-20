@@ -38,6 +38,13 @@ def remove_footer():
         logger.error("Could not process 'built with' styles.")
 
 
+def extract_ip_address(environ: dict) -> str:
+    asgi_scope = environ.get('asgi.scope')
+    if asgi_scope:
+        client = asgi_scope.get('client')
+        return client[0]
+    return None
+
 
 @cl.langchain_factory(use_async=True)
 async def init():
@@ -54,7 +61,7 @@ async def init():
     """
 
     emitter = get_emitter()
-    remote_address = emitter.session.environ
+    remote_address = extract_ip_address(emitter.session.environ)
 
     msg = cl.Message(content=f"Processing files. Please wait.")
     await msg.send()

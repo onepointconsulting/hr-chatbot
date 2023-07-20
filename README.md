@@ -25,10 +25,9 @@ pip install prompt_toolkit
 # conda remove -n langchain_chainlit_2 --all
 conda create -n langchain_chainlit_2 python=3.11
 conda activate langchain_chainlit_2
-# pip install --force-reinstall C:\development\onepoint\hr\chainlit\src\dist\chainlit-0.5.2.1-py3-none-any.whl
+# pip install --force-reinstall /home/ubuntu/chainlit-0.5.3-py3-none-any.whl
 pip install --force-reinstall C:\development\playground\chainlit\src\dist\chainlit-0.5.3-py3-none-any.whl
 pip install langchain
-pip install openai
 pip install faiss-cpu
 pip install tiktoken
 pip install pdfminer
