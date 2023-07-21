@@ -20,7 +20,6 @@ VST = TypeVar("VST", bound="VectorStore")
 
 
 class KeySourceMemory(ConversationSummaryBufferMemory):
-
     def _get_input_output(
         self, inputs: Dict[str, Any], outputs: Dict[str, str]
     ) -> Tuple[str, str]:
@@ -29,7 +28,7 @@ class KeySourceMemory(ConversationSummaryBufferMemory):
         else:
             prompt_input_key = self.input_key
         if self.output_key is None:
-            output_key = 'answer'
+            output_key = "answer"
         else:
             output_key = self.output_key
         return inputs[prompt_input_key], outputs[output_key]
@@ -37,10 +36,10 @@ class KeySourceMemory(ConversationSummaryBufferMemory):
 
 def load_embeddinges() -> Tuple[VST, List[Document]]:
     """
-    Loads the PDF documents to support text extraction in the Chainlit UI. 
-    In case there are no persisted embeddings, the embeddings are generated. 
+    Loads the PDF documents to support text extraction in the Chainlit UI.
+    In case there are no persisted embeddings, the embeddings are generated.
     In case the embeddings are persisted, then they are loaded from the file system.
-    
+
     Returns:
     Tuple[VST, List[Document]]: Recturs a reference to the vector store and the list of all pdf files.
     """
@@ -54,7 +53,6 @@ def load_embeddinges() -> Tuple[VST, List[Document]]:
         docsearch = FAISS.load_local(embedding_dir, cfg.embeddings)
         return docsearch, documents
     return generate_embeddings(documents, doc_location), documents
-
 
 
 template = """Given the following extracted parts of a long document and a question, create a final answer with references ("SOURCES"). If you know a joke about the subject, make sure that you include it in the response.
@@ -92,38 +90,40 @@ QUESTION: {question}
 {summaries}
 =========
 FINAL ANSWER:"""
-HUMOUR_PROMPT = PromptTemplate(template=template, input_variables=["summaries", "question"])
+HUMOUR_PROMPT = PromptTemplate(
+    template=template, input_variables=["summaries", "question"]
+)
 
 
-
-def create_retrieval_chain(docsearch: VST, verbose: bool=False, humour: bool=True) -> RetrievalQAWithSourcesChain:
-
+def create_retrieval_chain(
+    docsearch: VST, verbose: bool = False, humour: bool = True
+) -> RetrievalQAWithSourcesChain:
     """
-    This function creates the QA chain with memory and in case the humour parameter is true, 
+    This function creates the QA chain with memory and in case the humour parameter is true,
     then a manipulated prompt - that tends to create jokes on certain occasions - is used.
 
     Parameters:
     docsearch (VST): A reference to the vector store.
     verbose (bool): Determines whether LangChain's internal logging is printed to the console or not.
     humour (bool): Determines whether the prompt for answers with jokes is used or not.
-    
+
     Returns:
     RetrievalQAWithSourcesChain: The QA chain
     """
-    memory = KeySourceMemory(llm=cfg.llm, input_key='question', output_key='answer')
+    memory = KeySourceMemory(llm=cfg.llm, input_key="question", output_key="answer")
     chain_type_kwargs = {}
     if verbose:
-        chain_type_kwargs['verbose'] = True
+        chain_type_kwargs["verbose"] = True
     if humour:
-        chain_type_kwargs['prompt'] = HUMOUR_PROMPT
+        chain_type_kwargs["prompt"] = HUMOUR_PROMPT
     search_retriever: VectorStoreRetriever = docsearch.as_retriever()
-    search_retriever.search_kwargs = {'k': cfg.search_results}
+    search_retriever.search_kwargs = {"k": cfg.search_results}
     qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
-        cfg.llm, 
+        cfg.llm,
         retriever=search_retriever,
-        chain_type="stuff", 
+        chain_type="stuff",
         memory=memory,
-        chain_type_kwargs=chain_type_kwargs
+        chain_type_kwargs=chain_type_kwargs,
     )
 
     return qa_chain
@@ -133,6 +133,3 @@ if __name__ == "__main__":
     docsearch, documents = load_embeddinges()
     chain: RetrievalQAWithSourcesChain = create_retrieval_chain(docsearch)
     logger.info(chain)
-
-
-    

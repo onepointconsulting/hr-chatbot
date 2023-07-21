@@ -8,6 +8,7 @@ from log_init import logger
 
 import sys
 
+
 def init_chain():
     humour = False
     if len(sys.argv) > 1:
@@ -16,19 +17,21 @@ def init_chain():
             logger.warning("Humor flag activated")
     session = PromptSession(history=FileHistory(".agent-history-file"))
     docsearch, documents = load_embeddinges()
-    chain: RetrievalQAWithSourcesChain = create_retrieval_chain(docsearch, humour=humour)
-    return session,chain
+    chain: RetrievalQAWithSourcesChain = create_retrieval_chain(
+        docsearch, humour=humour
+    )
+    return session, chain
+
 
 if __name__ == "__main__":
-
     session, chain = init_chain()
 
     while True:
         question = session.prompt(
             HTML("<b>Type <u>Your question</u></b>  ('q' to exit): ")
         )
-        if question.lower() in ['q', 'exit', 'quit']:
+        if question.lower() in ["q", "exit", "quit"]:
             break
-        response = chain({'question': question})
+        response = chain({"question": question})
         logger.info(f"Answer: {response['answer']}")
         logger.info(f"Sources: {response['sources']}")

@@ -23,10 +23,10 @@ def load_pdfs(path: Path) -> List[Document]:
     """
     Loads the PDFs and extracts a document per page.
     The page details are added to the extracted metadata
-    
+
     Parameters:
     path (Path): The path where the PDFs are saved.
-    
+
     Returns:
     List[Document]: Returns a list of values
     """
@@ -36,8 +36,8 @@ def load_pdfs(path: Path) -> List[Document]:
         loader = PyPDFium2Loader(str(pdf.absolute()))
         pages: List[Document] = loader.load_and_split()
         for i, p in enumerate(pages):
-            file_name = re.sub(r".+[\\/]", '', p.metadata['source'])
-            p.metadata['source'] = f"{file_name} page {i + 1}"
+            file_name = re.sub(r".+[\\/]", "", p.metadata["source"])
+            p.metadata["source"] = f"{file_name} page {i + 1}"
         all_pages.extend(pages)
         logger.info(f"Processed {pdf}, all_pages size: {len(all_pages)}")
     log_stats(all_pages)
@@ -57,11 +57,11 @@ def log_stats(documents: List[Document]):
 def generate_embeddings(documents: List[Document], path: Path) -> VST:
     """
     Receives a list of documents and generates the embeddings via OpenAI API.
-    
+
     Parameters:
     documents (List[Document]): The document list with one page per document.
     path (Path): The path where the documents are found.
-    
+
     Returns:
     VST: Recturs a reference to the vector store.
     """
@@ -71,14 +71,14 @@ def generate_embeddings(documents: List[Document], path: Path) -> VST:
         logger.info("Vector database persisted")
     except Exception as e:
         logger.error(f"Failed to process {path}: {str(e)}")
-        if 'docsearch' in vars() or 'docsearch' in globals():
+        if "docsearch" in vars() or "docsearch" in globals():
             docsearch.persist()
         return docsearch
     return docsearch
 
 
 def count_words(document: Document) -> int:
-    splits = [s for s in re.split('[\s,.]', document.page_content) if len(s) > 0]
+    splits = [s for s in re.split("[\s,.]", document.page_content) if len(s) > 0]
     return len(splits)
 
 

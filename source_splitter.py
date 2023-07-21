@@ -22,4 +22,3 @@ if __name__ == "__main__":
     raw_sources, file_sources = source_splitter(sources)
     logger.info(f"raw sources: {raw_sources}")
     logger.info(f"file sources: {file_sources}")
-

@@ -1,5 +1,5 @@
 import logging
 
-logging.basicConfig(level='INFO')
+logging.basicConfig(level="INFO")
 
 logger = logging.getLogger("hr_chatbot")
