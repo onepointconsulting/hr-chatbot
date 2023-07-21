@@ -32,6 +32,7 @@ pip install faiss-cpu
 pip install tiktoken
 pip install pdfminer
 pip install pypdfium2
+pip install black
 ```
 
 ## Configuration

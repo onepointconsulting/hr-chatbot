@@ -76,12 +76,16 @@ async def init():
     cl.user_session.set(KEY_META_DATAS, metadatas)
     cl.user_session.set(KEY_TEXTS, texts)
 
-    msg.content = f"You can now ask questions about Onepoint HR (IP Address: {remote_address})!"
-    
-    if geo_location.country_code != 'Not found':
-        geo_location_msg = cl.Message(content=f"""Geo location: 
+    msg.content = (
+        f"You can now ask questions about Onepoint HR (IP Address: {remote_address})!"
+    )
+
+    if geo_location.country_code != "Not found":
+        geo_location_msg = cl.Message(
+            content=f"""Geo location: 
 - country: {geo_location.country_name}
-- country code: {geo_location.country_code}""")
+- country code: {geo_location.country_code}"""
+        )
         await geo_location_msg.send()
     await msg.send()
 
