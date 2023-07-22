@@ -1,7 +1,7 @@
 from langchain.chains import RetrievalQAWithSourcesChain
 import chainlit as cl
 
-from chain_factory import create_retrieval_chain, load_all_chains, load_embeddinges
+from chain_factory import load_all_chains
 from geolocation import extract_ip_address, geolocate
 from source_splitter import source_splitter
 from chainlit.context import get_emitter
@@ -9,37 +9,47 @@ from chainlit.context import get_emitter
 from log_init import logger
 
 from pathlib import Path
-import re
-import os
+from typing import Dict, Optional
+
+from config import cfg
 
 KEY_META_DATAS = "metadatas"
 KEY_TEXTS = "texts"
+KEY_GEOLOCATION_COUNTRY_CODE = "geolocation_country_code"
 
 
-def remove_footer():
-    try:
-        build_dir = cl.server.build_dir
-        logger.warn(f"Build directory: {build_dir}")
-        index_html = Path(build_dir) / "index.html"
-        if index_html.exists():
-            with open(index_html, "r") as f:
-                content = f.read()
-                hide_css = """
-        <style>
-            a[href='https://github.com/Chainlit/chainlit'] {
-                visibility: hidden;
-            }
-        </style>
+def set_session_vars(user_session_dict: Dict):
+    for k, v in user_session_dict.items():
+        cl.user_session.set(k, v)
+
+
+def create_pdf(pdf_name: str, pdf_path: str) -> Optional[cl.File]:
     """
-                if "visibility: hidden" not in content:
-                    changed_html = re.sub(
-                        r"(</head>)", hide_css + "</head>", content, re.MULTILINE
-                    )
-                    logger.warn(f"Changed HTML {changed_html}")
-                    with open(index_html, "w") as f:
-                        f.write(changed_html)
-    except Exception as e:
-        logger.error("Could not process 'built with' styles.")
+    Creates a file download button for a PDF file in case it is found.
+
+    Parameters:
+    pdf_name (str): The file name
+    pdf_path (str): The file name
+
+    Returns:
+    RetrievalQAWithSourcesChain: The QA chain
+    """
+    logger.info(f"Creating pdf for {pdf_path}")
+    # Sending a pdf with the local file path
+    country_code = cl.user_session.get(KEY_GEOLOCATION_COUNTRY_CODE)
+    country_config = cfg.location_persistence_map.get(country_code)
+    if country_config:
+        logger.info("country_config found")
+        doc_location: Path = country_config.get("doc_location")
+        doc_path = doc_location / pdf_path
+        if doc_path.exists():
+            logger.info("Creating pdf component")
+            return cl.File(
+                name=pdf_name, display="inline", path=str(doc_path.absolute())
+            )
+        else:
+            logger.info(f"doc path {doc_path} does not exist.")
+    return None
 
 
 @cl.langchain_factory(use_async=True)
@@ -83,12 +93,16 @@ async def init():
     chain: RetrievalQAWithSourcesChain = qa_data.chain
     metadatas = [d.metadata for d in documents]
     texts = [d.page_content for d in documents]
-    cl.user_session.set(KEY_META_DATAS, metadatas)
-    cl.user_session.set(KEY_TEXTS, texts)
 
-    msg.content = (
-        f"You can now ask questions about Onepoint HR (IP Address: {remote_address}, country code: {country_code})!"
+    set_session_vars(
+        {
+            KEY_META_DATAS: metadatas,
+            KEY_TEXTS: texts,
+            KEY_GEOLOCATION_COUNTRY_CODE: country_code,
+        }
     )
+
+    msg.content = f"You can now ask questions about Onepoint HR (IP Address: {remote_address}, country code: {country_code})!"
     await msg.send()
 
     return chain
@@ -115,26 +129,37 @@ async def process_response(res) -> cl.Message:
     texts = cl.user_session.get(KEY_TEXTS)
 
     found_sources = []
+    pdf_elements = []
     if sources:
         logger.info(f"sources: {sources}")
         raw_sources, file_sources = source_splitter(sources)
         for i, source in enumerate(raw_sources):
             try:
+                source_name = file_sources[i]
+                pdf_element = create_pdf(source_name, source_name)
+                if pdf_element:
+                    pdf_elements.append(pdf_element)
+                    logger.info(f"PDF Elements: {pdf_elements}")
+                else:
+                    logger.warning(f"No pdf element for {source_name}")
+
                 index = all_sources.index(source)
                 text = texts[index]
-                source_name = file_sources[i]
-                found_sources.append(source_name)
+                found_sources.append(source)
                 # Create the text element referenced in the message
                 logger.info(f"Found text in {source_name}")
                 source_elements.append(cl.Text(content=text, name=source_name))
-            except ValueError:
+            except ValueError as e:
+                logger.error(f"Value error {e}")
                 continue
         if found_sources:
             answer += f"\nSources: {', '.join(found_sources)}"
         else:
             answer += f"\n{sources}"
 
+    logger.info(f"PDF Elements: {pdf_elements}")
     await cl.Message(content=answer, elements=source_elements).send()
+    await cl.Message(content="PDF Downloads", elements=pdf_elements).send()
 
 
 if __name__ == "__main__":
