@@ -54,7 +54,9 @@ def log_stats(documents: List[Document]):
     logger.info(f"Tokens Min {np.mean(counts)}")
 
 
-def generate_embeddings(documents: List[Document], path: Path) -> VST:
+def generate_embeddings(
+    documents: List[Document], path: Path, faiss_persist_directory: str
+) -> VST:
     """
     Receives a list of documents and generates the embeddings via OpenAI API.
 
@@ -67,7 +69,7 @@ def generate_embeddings(documents: List[Document], path: Path) -> VST:
     """
     try:
         docsearch = FAISS.from_documents(documents, cfg.embeddings)
-        docsearch.save_local(cfg.faiss_persist_directory)
+        docsearch.save_local(faiss_persist_directory)
         logger.info("Vector database persisted")
     except Exception as e:
         logger.error(f"Failed to process {path}: {str(e)}")

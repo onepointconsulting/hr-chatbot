@@ -4,7 +4,7 @@ from langchain.vectorstores import FAISS
 from langchain.schema import Document
 from langchain.prompts import PromptTemplate
 from langchain.memory.utils import get_prompt_input_key
-from langchain.vectorstores.base import VectorStoreRetriever
+from langchain.vectorstores.base import VectorStoreRetriever, VectorStore
 from config import cfg
 from typing import Any, Dict, Tuple, List, TypeVar
 
@@ -13,7 +13,7 @@ import os
 from pathlib import Path
 
 from generate_embeddings import load_pdfs, generate_embeddings
-
+from hr_model import QAData
 from log_init import logger
 
 VST = TypeVar("VST", bound="VectorStore")
@@ -34,7 +34,10 @@ class KeySourceMemory(ConversationSummaryBufferMemory):
         return inputs[prompt_input_key], outputs[output_key]
 
 
-def load_embeddinges() -> Tuple[VST, List[Document]]:
+def load_embeddinges(
+    embedding_dir: Path = cfg.faiss_persist_directory_uk,
+    doc_location: Path = cfg.doc_location_uk,
+) -> Tuple[VST, List[Document]]:
     """
     Loads the PDF documents to support text extraction in the Chainlit UI.
     In case there are no persisted embeddings, the embeddings are generated.
@@ -43,16 +46,17 @@ def load_embeddinges() -> Tuple[VST, List[Document]]:
     Returns:
     Tuple[VST, List[Document]]: Recturs a reference to the vector store and the list of all pdf files.
     """
-    embedding_dir = cfg.faiss_persist_directory
     logger.info(f"Checking: {embedding_dir}")
-    doc_location: str = os.environ["DOC_LOCATION"]
-    documents = load_pdfs(Path(doc_location))
+    documents = load_pdfs(doc_location)
     assert len(documents) > 0
     if embedding_dir.exists() and len(list(embedding_dir.glob("*"))) > 0:
         logger.info(f"reading from existing directory: {embedding_dir}")
         docsearch = FAISS.load_local(embedding_dir, cfg.embeddings)
         return docsearch, documents
-    return generate_embeddings(documents, doc_location), documents
+    return (
+        generate_embeddings(documents, doc_location, embedding_dir.absolute()),
+        documents,
+    )
 
 
 template = """Given the following extracted parts of a long document and a question, create a final answer with references ("SOURCES"). If you know a joke about the subject, make sure that you include it in the response.
@@ -129,7 +133,18 @@ def create_retrieval_chain(
     return qa_chain
 
 
+def load_all_chains(country_filter: str = None) -> Dict[str, QAData]:
+    res = {}
+    for country, v in cfg.location_persistence_map.items():
+        if country_filter is None or country_filter == country:
+            faiss_persist_directory = v["faiss_persist_directory"]
+            doc_location = v["doc_location"]
+            vst, documents = load_embeddinges(faiss_persist_directory, doc_location)
+            chain = create_retrieval_chain(vst, humour=os.getenv("HUMOUR") == "true")
+            res[country] = QAData(vst=vst, documents=documents, chain=chain)
+    return res
+
+
 if __name__ == "__main__":
-    docsearch, documents = load_embeddinges()
-    chain: RetrievalQAWithSourcesChain = create_retrieval_chain(docsearch)
-    logger.info(chain)
+    chain_dict = load_all_chains()
+    logger.info(len(chain_dict.items()))

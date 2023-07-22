@@ -1,7 +1,7 @@
 from langchain.chains import RetrievalQAWithSourcesChain
 import chainlit as cl
 
-from chain_factory import create_retrieval_chain, load_embeddinges
+from chain_factory import create_retrieval_chain, load_all_chains, load_embeddinges
 from geolocation import extract_ip_address, geolocate
 from source_splitter import source_splitter
 from chainlit.context import get_emitter
@@ -60,33 +60,35 @@ async def init():
     # The repo with this modification are here: https://github.com/gilfernandes/chainlit_hr_extension
     remote_address = extract_ip_address(emitter.session.environ)
     geo_location = geolocate(remote_address)
+
+    country_code = "GB"
+    if geo_location.country_code != "Not found":
+        country_code = geo_location.country_code
+        geo_location_msg = cl.Message(
+            content=f"""Geo location: 
+- country: {geo_location.country_name}
+- country code: {country_code}"""
+        )
+        await geo_location_msg.send()
+
     logger.info(f"Geo location: {geo_location}")
 
     msg = cl.Message(content=f"Processing files. Please wait.")
     await msg.send()
-    docsearch, documents = load_embeddinges()
+    chain_dict = load_all_chains(country_code)
+    qa_data = chain_dict[country_code]
 
-    humour = os.getenv("HUMOUR") == "true"
+    documents = qa_data.documents
 
-    chain: RetrievalQAWithSourcesChain = create_retrieval_chain(
-        docsearch, humour=humour
-    )
+    chain: RetrievalQAWithSourcesChain = qa_data.chain
     metadatas = [d.metadata for d in documents]
     texts = [d.page_content for d in documents]
     cl.user_session.set(KEY_META_DATAS, metadatas)
     cl.user_session.set(KEY_TEXTS, texts)
 
     msg.content = (
-        f"You can now ask questions about Onepoint HR (IP Address: {remote_address})!"
+        f"You can now ask questions about Onepoint HR (IP Address: {remote_address}, country code: {country_code})!"
     )
-
-    if geo_location.country_code != "Not found":
-        geo_location_msg = cl.Message(
-            content=f"""Geo location: 
-- country: {geo_location.country_name}
-- country code: {geo_location.country_code}"""
-        )
-        await geo_location_msg.send()
     await msg.send()
 
     return chain
