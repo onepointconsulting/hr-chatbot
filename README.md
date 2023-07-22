@@ -1,6 +1,7 @@
 # Onepoint HR Chatbot
 
-This is a simple HR chatbot based on Chainlit with memory support.
+This is a simple HR chatbot based on Chainlit with memory support and able to 
+choose its vector database based on geolocation.
 
 ## Installation
 
