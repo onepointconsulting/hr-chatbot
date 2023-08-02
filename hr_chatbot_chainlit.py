@@ -74,12 +74,7 @@ async def init():
     country_code = "GB"
     if geo_location.country_code != "Not found":
         country_code = geo_location.country_code
-        geo_location_msg = cl.Message(
-            content=f"""Geo location: 
-- country: {geo_location.country_name}
-- country code: {country_code}"""
-        )
-        await geo_location_msg.send()
+        # await display_location_details(geo_location, country_code)
 
     logger.info(f"Geo location: {geo_location}")
 
@@ -106,6 +101,15 @@ async def init():
     await msg.send()
 
     return chain
+
+
+async def display_location_details(geo_location, country_code):
+    geo_location_msg = cl.Message(
+        content=f"""Geo location: 
+- country: {geo_location.country_name}
+- country code: {country_code}"""
+    )
+    await geo_location_msg.send()
 
 
 @cl.langchain_postprocess
