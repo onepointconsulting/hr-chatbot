@@ -97,7 +97,7 @@ async def init():
         }
     )
 
-    msg.content = f"You can now ask questions about Onepoint HR (IP Address: {remote_address}, country code: {country_code})!"
+    msg.content = f"You can now ask questions about Onepoint HR ({country_code})!"
     await msg.send()
 
     return chain
