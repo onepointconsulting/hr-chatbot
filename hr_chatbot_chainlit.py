@@ -68,15 +68,25 @@ async def init():
     emitter = get_emitter()
     # Please note this works only with a modified version of Streamlit
     # The repo with this modification are here: https://github.com/gilfernandes/chainlit_hr_extension
-    remote_address = extract_ip_address(emitter.session.environ)
-    geo_location = geolocate(remote_address)
 
     country_code = "GB"
-    if geo_location.country_code != "Not found":
-        country_code = geo_location.country_code
-        # await display_location_details(geo_location, country_code)
+    geolocation_failed = False
 
-    logger.info(f"Geo location: {geo_location}")
+    try:
+        remote_address = extract_ip_address(emitter.session.environ)
+        geo_location = geolocate(remote_address)
+
+        if geo_location.country_code != "Not found":
+            country_code = geo_location.country_code
+            # await display_location_details(geo_location, country_code)
+    except:
+        logger.exception("Could not locate properly")
+        geolocation_failed = True
+
+    if geolocation_failed:
+        await cl.Message(content=f"Geolocation failed ... I do not know where you are.").send()
+    else:
+        logger.info(f"Geo location: {geo_location}")
 
     msg = cl.Message(content=f"Processing files. Please wait.")
     await msg.send()
@@ -97,6 +107,7 @@ async def init():
         }
     )
 
+    
     msg.content = f"You can now ask questions about Onepoint HR ({country_code})!"
     await msg.send()
 

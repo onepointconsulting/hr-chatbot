@@ -1,4 +1,4 @@
-# Welcome to Ask AIshu HR Bot! 🚀🤖
+# Welcome to Ask AIshu HR! 🚀🤖
 
 Using this chatbot you can ask questions about the HR policies at Onepoint.
 
